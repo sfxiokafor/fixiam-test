@@ -132,5 +132,13 @@ export default function App() {
             </pre>
             <button
               onClick={onLogout}
-              className="mt-4 w-full rounded-lg px-4 py-2 text-white bg-
-
+              className="mt-4 w-full rounded-lg px-4 py-2 text-white bg-red-600 hover:bg-red-700"
+            >
+              Sign out
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
