@@ -1,17 +1,15 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
-// ====== CONFIG: change these 4–5 values ======
-const AUTH_URL     = "https://YOUR-FIXIAM/realms/YOUR-REALM/protocol/openid-connect/auth";
-const LOGOUT_URL   = "https://YOUR-FIXIAM/realms/YOUR-REALM/protocol/openid-connect/logout";
-const CLIENT_ID    = "dummy-sso-demo";
-const REDIRECT_URI = "https://YOUR-REPLIT-APP.USERNAME.repl.co/"; // include trailing slash
+/* ===================== CONFIG: EDIT THESE ===================== */
+const AUTH_URL     = "https://seamfix-sales-demo.stg-iam.seamfix.com/realms/seamfix-sales-demo/protocol/openid-connect/auth";
+const LOGOUT_URL   = "https://seamfix-sales-demo.stg-iam.seamfix.com/realms/seamfix-sales-demo/protocol/openid-connect/logout";
+const CLIENT_ID    = "dummy-sso-demo"; // (or whatever you registered in FixIAM)
+const REDIRECT_URI = "https://<your-app>-<yourusername>.repl.co/"; // your deployed Replit URL with trailing /
 const SCOPE        = "openid profile email";
-// For the simplest first demo we’ll use implicit flow:
-const USE_IMPLICIT = true; // keep true for now
-// ============================================
+============================================================= */
 
-function b64UrlToJSON(token: string) {
-  const payload = token.split(".")[1];
+function decodeIdToken(idToken: string) {
+  const payload = idToken.split(".")[1];
   const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
   return JSON.parse(
     decodeURIComponent(
@@ -29,8 +27,8 @@ export default function App() {
 
   const emailValid = useMemo(() => /.+@.+\..+/.test(email.trim()), [email]);
 
+  // Handle implicit return (tokens in URL hash)
   useEffect(() => {
-    // Handle implicit return (tokens in hash)
     if (!USE_IMPLICIT) return;
     if (!location.hash) return;
 
@@ -42,12 +40,11 @@ export default function App() {
     const idToken = params.get("id_token");
     if (idToken) {
       try {
-        setClaims(b64UrlToJSON(idToken));
+        setClaims(decodeIdToken(idToken));
       } catch (e: any) {
         setError("Could not decode ID token: " + e?.message);
       }
-      // clean URL
-      history.replaceState({}, "", REDIRECT_URI);
+      history.replaceState({}, "", REDIRECT_URI); // clean the hash
     }
   }, []);
 
@@ -62,14 +59,13 @@ export default function App() {
     u.searchParams.set("scope", SCOPE);
     u.searchParams.set("state", state);
     u.searchParams.set("nonce", nonce);
-    u.searchParams.set("login_hint", email.trim()); // prefill Syncfix IAM username
+    u.searchParams.set("login_hint", email.trim()); // prefill username in FixIAM
 
     if (USE_IMPLICIT) {
       u.searchParams.set("response_type", "id_token token");
       u.searchParams.set("response_mode", "fragment");
     } else {
-      // (PKCE path would go here later)
-      u.searchParams.set("response_type", "code");
+      u.searchParams.set("response_type", "code"); // (PKCE path for later)
     }
 
     window.location.href = u.toString();
@@ -81,58 +77,64 @@ export default function App() {
     window.location.href = u.toString();
   };
 
+  // Minimal styling without Tailwind
+  const card: React.CSSProperties = { width: 360, background: "#fff", border: "1px solid #e5e7eb", borderRadius: 12, boxShadow: "0 6px 18px rgba(0,0,0,.06)", padding: 24 };
+  const input: React.CSSProperties = { width: "100%", padding: "12px 12px", border: "1px solid #d1d5db", borderRadius: 8, fontSize: 14 };
+  const btn: React.CSSProperties = { width: "100%", padding: "11px 16px", borderRadius: 8, border: 0, color: "#fff", background: "#2563eb", cursor: "pointer" };
+  const btnDisabled: React.CSSProperties = { ...btn, background: "#9db7f4", cursor: "not-allowed" };
+  const link: React.CSSProperties = { color: "#2563eb", background: "transparent", border: 0, cursor: "pointer", padding: 0 };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-[360px] bg-white border border-gray-200 rounded-xl shadow-md p-6">
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#fafafa" }}>
+      <div style={card}>
         {!claims ? (
           <>
-            <div className="text-lg font-semibold mb-1">Microsoft (Demo)</div>
-            <h1 className="text-xl font-semibold mb-4">Sign in</h1>
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>Microsoft (Demo)</div>
+            <h1 style={{ fontSize: 20, fontWeight: 600, margin: "0 0 12px" }}>Sign in</h1>
 
-            <label className="text-sm text-gray-600 mb-1 block">
+            <label style={{ fontSize: 13, color: "#666", display: "block", marginBottom: 6 }}>
               Email, phone, or Skype
             </label>
             <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               type="email"
               placeholder="name@example.com"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={input}
+              autoComplete="username"
             />
 
-            <button
-              onClick={onNext}
-              disabled={!emailValid}
-              className={`mt-4 w-full rounded-lg px-4 py-2 text-white ${
-                emailValid ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-300 cursor-not-allowed"
-              }`}
-            >
-              Next
-            </button>
+            <div style={{ marginTop: 14 }}>
+              <button onClick={onNext} disabled={!emailValid} style={emailValid ? btn : btnDisabled}>Next</button>
+            </div>
 
-            <button
-              onClick={() => { setEmail(""); setError(null); }}
-              className="mt-3 w-full text-blue-600"
-            >
-              Use another account
-            </button>
+            <div style={{ marginTop: 10 }}>
+              <button onClick={() => { setEmail(""); setError(null); }} style={link}>Use another account</button>
+            </div>
 
-            {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
+            {error && <div style={{ marginTop: 10, color: "#b91c1c", fontSize: 13 }}>{error}</div>}
 
-            <p className="mt-4 text-sm text-gray-500">
+            <div style={{ marginTop: 10, color: "#666", fontSize: 13 }}>
               This demo routes to Syncfix IAM (FixIAM) and uses <code>login_hint</code> to prefill your email.
-            </p>
+            </div>
           </>
         ) : (
           <>
-            <h1 className="text-xl font-semibold mb-2">Signed in</h1>
-            <div className="text-green-700 mb-2">✅ Authentication completed (demo)</div>
-            <pre className="text-xs bg-gray-100 border border-dashed border-gray-300 rounded-lg p-3 overflow-auto max-h-80">
+            <h1 style={{ fontSize: 20, fontWeight: 600, margin: "0 0 12px" }}>Signed in</h1>
+            <div style={{ color: "#0a7c2f" }}>✅ Authentication completed (demo)</div>
+            <pre style={{ marginTop: 12, background: "#f6f7fb", border: "1px dashed #e5e7eb", borderRadius: 8, padding: 10, fontFamily: "ui-monospace, Menlo, Consolas, monospace", fontSize: 12, maxHeight: 320, overflow: "auto" }}>
 {JSON.stringify(claims, null, 2)}
             </pre>
-            <button
-              onClick={onLogout}
-              className="mt-4 w-full rounded-lg px-4 py-2 text-white bg-red-600 hover:bg-red-700"
+            <div style={{ marginTop: 16 }}>
+              <button onClick={onLogout} style={btn}>Logout</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+d-600 hover:bg-red-700"
             >
               Sign out
             </button>
