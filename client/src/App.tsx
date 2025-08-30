@@ -6,7 +6,8 @@ const LOGOUT_URL   = "https://seamfix-sales-demo.stg-iam.seamfix.com/realms/seam
 const CLIENT_ID    = "dummy-sso-demo"; // (or whatever you registered in FixIAM)
 const REDIRECT_URI = "https://<your-app>-<yourusername>.repl.co/"; // your deployed Replit URL with trailing /
 const SCOPE        = "openid profile email";
-============================================================= */
+const USE_IMPLICIT = true; // Using implicit flow for demo
+/* ============================================================= */
 
 function decodeIdToken(idToken: string) {
   const payload = idToken.split(".")[1];
@@ -128,16 +129,6 @@ export default function App() {
             <div style={{ marginTop: 16 }}>
               <button onClick={onLogout} style={btn}>Logout</button>
             </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-d-600 hover:bg-red-700"
-            >
-              Sign out
-            </button>
           </>
         )}
       </div>
