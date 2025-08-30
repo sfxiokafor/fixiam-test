@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-  const AUTH_URL     = "https://seamfix-sales-demo.stg-iam.seamfix.com/realms/seamfix-sales-demo/protocol/openid-connect/auth";
-  const LOGOUT_URL   = "https://seamfix-sales-demo.stg-iam.seamfix.com/realms/seamfix-sales-demo/protocol/openid-connect/logout";
-  const CLIENT_ID    = "dummy-sso-demo";   // or the exact client id you create in FixIAM
-  const REDIRECT_URI = "https://574f5b20-d387-4a29-adf3-aa17ce39bf29-00-3qzygyvx827pb.janeway.replit.dev/";  // include trailing slash
-  const SCOPE        = "openid profile email";
+const USE_IMPLICIT = true; // Set to false if you want to use authorization code flow instead
+
+const AUTH_URL     = "https://seamfix-sales-demo.stg-iam.seamfix.com/realms/seamfix-sales-demo/protocol/openid-connect/auth";
+const LOGOUT_URL   = "https://seamfix-sales-demo.stg-iam.seamfix.com/realms/seamfix-sales-demo/protocol/openid-connect/logout";
+const CLIENT_ID    = "dummy-sso-demo";   // or the exact client id you create in FixIAM
+const REDIRECT_URI = "https://574f5b20-d387-4a29-adf3-aa17ce39bf29-00-3qzygyvx827pb.janeway.replit.dev/";  // include trailing slash
+const SCOPE        = "openid profile email";
 
 
 function decodeIdToken(idToken: string) {
@@ -127,16 +129,6 @@ export default function App() {
             <div style={{ marginTop: 16 }}>
               <button onClick={onLogout} style={btn}>Logout</button>
             </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-d-600 hover:bg-red-700"
-            >
-              Sign out
-            </button>
           </>
         )}
       </div>
